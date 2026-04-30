@@ -15,6 +15,7 @@ o2_add_library(IOTOFSimulation
                        src/Digitizer.cxx
                        src/DPLDigitizerParam.cxx
                       #  src/IOTOFServices.cxx
+                      src/Segmentation.cxx
                PUBLIC_LINK_LIBRARIES O2::IOTOFBase
                                      O2::DataFormatsIOTOF
                                      O2::ITSMFTSimulation)
@@ -25,4 +26,5 @@ o2_target_root_dictionary(IOTOFSimulation
                                   include/IOTOFSimulation/Digitizer.h
                                   include/IOTOFSimulation/DPLDigitizerParam.h
                                   # include/IOTOFSimulation/IOTOFServices.h
+                                  include/IOTOFSimulation/Segmentation.h
                           )
