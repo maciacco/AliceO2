@@ -22,7 +22,6 @@ namespace iotof
 class GeometryTGeo : public o2::detectors::DetMatrixCache
 {
  public:
-  using Mat3D = o2::math_utils::Transform3D;
   using DetMatrixCache::getMatrixL2G;
 
   GeometryTGeo(bool build = false, int loadTrans = 0);
@@ -92,7 +91,6 @@ class GeometryTGeo : public o2::detectors::DetMatrixCache
   TGeoHMatrix* extractMatrixSensor(int index) const;
 
   TString getMatrixPath(int index) const;
-
 
  protected:
   // Determine the number of active parts in the geometry

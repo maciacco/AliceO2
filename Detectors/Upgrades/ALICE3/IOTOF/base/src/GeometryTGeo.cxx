@@ -142,6 +142,10 @@ int GeometryTGeo::getIOTOFFirstChipIndex(int lay) const
 
 int GeometryTGeo::getIOTOFLayer(int index) const
 {
+  if (index < 0 || index > mLastChipIndex[1]) {
+    LOG(fatal) << "Invalid chip index " << index;
+    return -1;
+  }
   return index > mLastChipIndex[0] ? 1 : 0;
 }
 
@@ -277,7 +281,7 @@ void GeometryTGeo::fillMatrixCache(int mask)
 
     for (int i = 0; i < mSize; i++) {
       TGeoHMatrix* hm = extractMatrixSensor(i);
-      cacheL2G.setMatrix(Mat3D(*hm), i);
+      cacheL2G.setMatrix(o2::math_utils::Transform3D(*hm), i);
     }
   }
 }
