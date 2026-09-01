@@ -125,7 +125,9 @@ void Digitizer::processHit(const o2::itsmft::Hit& hit, int evID, int srcID)
   // Hit time is in seconds, convert to ns and add event time
   double hitTime = hit.GetTime() * sec2ns;      // convert to ns
   double eventTimeNS = mEventTime.getTimeNS();  // event time since orbit 0
-  double absoluteTime = hitTime + eventTimeNS;  // absolute time
+  double eventTimeInBC = mEventTime.getTimeOffsetWrtBC();
+//  double absoluteTime = hitTime + eventTimeNS;  // absolute time
+  double absoluteTime = hitTime + eventTimeInBC; // absolute time
   double smearedTime = smearTime(absoluteTime); // apply detector resolution
 
   if (chipID < 0 || chipID >= mGeometry->getSize() || mGeometry->getSize() < 1) {
@@ -340,10 +342,18 @@ void Digitizer::fillOutputContainer()
   // mExtraLabelBuffer.pop_front();
 }
 
+// have a addDigit funtion?
+
 void Digitizer::registerDigits(Chip& chip, uint32_t roFrame, double time, int nROF,
                                uint16_t row, uint16_t col, int nElectrons, o2::MCCompLabel& label)
 {
   (void)nROF;
+
+  uint64_t nbc = static_cast<uint64_t>(time / o2::constants::lhc::LHCBunchSpacingNS);
+  int tdc = int((time - nbc * o2::constants::lhc::LHCBunchSpacingNS) / .01);
+  nbc += mEventTime.toLong();
+
+  LOG(debug) << nbc << "\t" << tdc;
 
   auto key = o2::iotof::Digit::getOrderingKey(chip.getChipIndex(), row, col);
   o2::iotof::LabeledDigit* existingDigit = chip.findDigit(key);
