@@ -318,7 +318,7 @@ void Digitizer::fillOutputContainer()
       }
 
       int digitID = mDigits->size();
-      mDigits->emplace_back(digit.getChipIndex(), digit.getRow(), digit.getColumn(), digit.getCharge(), digit.getTime());
+      mDigits->emplace_back(digit.getChipIndex(), digit.getRow(), digit.getColumn(), digit.getCharge(), digit.getTime(), digit.getBc(), digit.getTdc());
       if (mMCLabels) {
         mMCLabels->addElement(digitID, digit.getLabel().mLabel);
       }
@@ -342,15 +342,17 @@ void Digitizer::fillOutputContainer()
   // mExtraLabelBuffer.pop_front();
 }
 
-// have a addDigit funtion?
+// have a addDigit function?
 
 void Digitizer::registerDigits(Chip& chip, uint32_t roFrame, double time, int nROF,
                                uint16_t row, uint16_t col, int nElectrons, o2::MCCompLabel& label)
 {
   (void)nROF;
 
+  const auto& digitizerParams = o2::iotof::DPLDigitizerParam::Instance();
+
   uint64_t nbc = static_cast<uint64_t>(time / o2::constants::lhc::LHCBunchSpacingNS);
-  int tdc = int((time - nbc * o2::constants::lhc::LHCBunchSpacingNS) / .01);
+  int tdc = int((time - nbc * o2::constants::lhc::LHCBunchSpacingNS) / digitizerParams.tdcBin);
   nbc += mEventTime.toLong();
 
   LOG(debug) << nbc << "\t" << tdc;
@@ -359,7 +361,7 @@ void Digitizer::registerDigits(Chip& chip, uint32_t roFrame, double time, int nR
   o2::iotof::LabeledDigit* existingDigit = chip.findDigit(key);
   if (!existingDigit) {
     // No existing digit, create a new one
-    chip.addDigit(row, col, nElectrons, time, label);
+    chip.addDigit(row, col, nElectrons, time, nbc, tdc, label);
   } else {
     // Digit already exists, update charge and labels
     const int storedCharge = existingDigit->getCharge();

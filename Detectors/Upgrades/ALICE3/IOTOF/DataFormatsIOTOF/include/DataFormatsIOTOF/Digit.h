@@ -28,14 +28,16 @@ class Digit : public o2::itsmft::Digit
 {
  public:
   ~Digit() = default;
-  Digit(UShort_t chipindex = 0, UShort_t row = 0, UShort_t col = 0, Int_t charge = 0, double time = 0.)
-    : o2::itsmft::Digit(chipindex, row, col, charge), mTime(time) {};
+  Digit(UShort_t chipindex = 0, UShort_t row = 0, UShort_t col = 0, Int_t charge = 0, double time = 0., ULong64_t bc = 0, Int_t tdc = 0)
+    : o2::itsmft::Digit(chipindex, row, col, charge), mTime(time), mBc(bc), mTdc(tdc) {};
 
   // Setters
   void setTime(double time) { mTime = time; }
 
   // Getters
   double getTime() const { return mTime; }
+  ULong64_t getBc() const { return mBc; }
+  Int_t getTdc() const { return mTdc; }
 
   static UInt_t getOrderingKey(UShort_t chipindex, UShort_t row, UShort_t col)
   {
@@ -44,6 +46,8 @@ class Digit : public o2::itsmft::Digit
 
  private:
   double mTime = 0.; ///< Measured time (ns)
+  ULong64_t mBc = 0;  ///< BC
+  Int_t mTdc = 0;    ///< tdc time
   ClassDefNV(Digit, 1);
 };
 
@@ -59,9 +63,9 @@ struct McLabelRef {
 class LabeledDigit : public Digit
 {
  public:
-  LabeledDigit(UShort_t chipindex = 0, UShort_t row = 0, UShort_t col = 0, Int_t charge = 0, double time = 0.,
+  LabeledDigit(UShort_t chipindex = 0, UShort_t row = 0, UShort_t col = 0, Int_t charge = 0, double time = 0., ULong64_t bc = 0, Int_t tdc = 0,
                o2::MCCompLabel label = 0)
-    : Digit(chipindex, row, col, charge, time), mLabel(label) {}
+    : Digit(chipindex, row, col, charge, time, bc, tdc), mLabel(label) {}
 
   void setLabel(McLabelRef label) { mLabel = label; }
   McLabelRef getLabel() const { return mLabel; }
