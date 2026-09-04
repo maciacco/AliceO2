@@ -123,12 +123,11 @@ void Digitizer::processHit(const o2::itsmft::Hit& hit, int evID, int srcID)
 
   // Get hit time and apply smearing
   // Hit time is in seconds, convert to ns and add event time
-  double hitTime = hit.GetTime() * sec2ns;      // convert to ns
-  double eventTimeNS = mEventTime.getTimeNS();  // event time since orbit 0
+  double hitTime = hit.GetTime() * sec2ns;       // convert to ns
+  double eventTimeNS = mEventTime.getTimeNS();   // event time since orbit 0
   double eventTimeInBC = mEventTime.getTimeOffsetWrtBC();
-//  double absoluteTime = hitTime + eventTimeNS;  // absolute time
-  double absoluteTime = hitTime + eventTimeInBC; // absolute time
-  double smearedTime = smearTime(absoluteTime); // apply detector resolution
+  double hitTimeWrtBC = hitTime + eventTimeInBC; // absolute time
+  double smearedTime = smearTime(hitTimeWrtBC);  // apply detector resolution
 
   if (chipID < 0 || chipID >= mGeometry->getSize() || mGeometry->getSize() < 1) {
     LOG(debug) << "Invalid detector ID: " << chipID << ", geometry size: " << mGeometry->getSize();
@@ -356,12 +355,13 @@ void Digitizer::registerDigits(Chip& chip, uint32_t roFrame, double time, int nR
   nbc += mEventTime.toLong();
 
   LOG(debug) << nbc << "\t" << tdc;
+  double absoluteTime = tdc * digitizerParams.tdcBin * 1.e-9 + nbc * o2::constants::lhc::LHCBunchSpacingNS;
 
   auto key = o2::iotof::Digit::getOrderingKey(chip.getChipIndex(), row, col);
   o2::iotof::LabeledDigit* existingDigit = chip.findDigit(key);
   if (!existingDigit) {
     // No existing digit, create a new one
-    chip.addDigit(row, col, nElectrons, time, nbc, tdc, label);
+    chip.addDigit(row, col, nElectrons, absoluteTime, nbc, tdc, label);
   } else {
     // Digit already exists, update charge and labels
     const int storedCharge = existingDigit->getCharge();
